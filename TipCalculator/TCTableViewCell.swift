@@ -6,12 +6,6 @@
 //  Copyright © 2016 funza Academy. All rights reserved.
 //
 
-////////////Resources////////////////
-/*
- //
- // http://stackoverflow.com/questions/33471858/swift-protocol-weak-cannot-be-applied-to-non-class-type
- //
-*/
 
 
 import UIKit
@@ -51,8 +45,7 @@ class TCTableViewCell:UITableViewCell {
                 if oldValue == nil {
                     
                     oldTipAmount = Double(tipAmount.text!)
-                    
-                    tipAmount.addTarget(self, action: "textFieldDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+                    tipAmount.addTarget(self, action: #selector(textFieldDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
       
             }
         }

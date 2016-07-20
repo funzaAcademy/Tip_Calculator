@@ -42,6 +42,10 @@ class TCInEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPic
         
         super.viewDidLoad()
         
+        //Set Master Data
+        TCMasterData.setGuestValues()
+        TCMasterData.setTipValues()
+        
         //Picker View
         numGuestpickerView = UIPickerView()
         numGuestpickerView.delegate = self
@@ -57,10 +61,15 @@ class TCInEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPic
         self.addDoneButtonOnKeyboard()
         
     }
+    //         Int(numGuests.text!),
     
     func calculateResults() {
         
-        if let numGuests = Int(numGuests.text!), tipPercent = Double(tipPercent.text!), billAmount = Double(billAmount.text!){
+        if let numGuests = TCMasterData.guest_to_num_converter[numGuests.text!],
+            tipPercent = TCMasterData.tip_to_num_converter[tipPercent.text!],  
+            billAmount = Double(billAmount.text!){
+            
+            print("Number of guests is : \(numGuests)")
             
             totalTipToPay.text = String(round( billAmount * tipPercent / 100 * 100 ) / 100)
             totalToPay.text =  String (round ((billAmount + Double(totalTipToPay.text!)!) * 100 ) / 100 )
@@ -101,7 +110,7 @@ extension TCInEqSplitViewController{
         doneToolbar.barStyle = UIBarStyle.Default
         
         let flexSpace = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil)
-        let done: UIBarButtonItem = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.Done, target: self, action: Selector("doneButtonAction"))
+        let done: UIBarButtonItem = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.Done, target: self, action: #selector(doneButtonAction))
         
         var items = [UIBarButtonItem]()
         items.append(flexSpace)
@@ -154,6 +163,9 @@ extension TCInEqSplitViewController{
 extension TCInEqSplitViewController{
     
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+        
+        //For example, if you wanted to do a picker for selecting time,
+        //you might have 3 components; one for each of hour, minutes and seconds
         return 1
     }
     
@@ -161,10 +173,10 @@ extension TCInEqSplitViewController{
         
         if pickerView == numGuestpickerView{
             
-            return TCHelperClass.numGuestOptions.count
+            return TCMasterData.guests.count
         }
         else {
-            return TCHelperClass.tipPercentOptions.count
+            return TCMasterData.tips.count
         }
         
         
@@ -174,11 +186,11 @@ extension TCInEqSplitViewController{
         
         if pickerView == numGuestpickerView{
             
-            return TCHelperClass.numGuestOptions[row]
+            return TCMasterData.guests[row]
         }
         else {
             
-            return TCHelperClass.tipPercentOptions[row]
+            return TCMasterData.tips[row]
         }
     }
     
@@ -186,12 +198,12 @@ extension TCInEqSplitViewController{
         
         if pickerView == numGuestpickerView{
             
-            numGuests.text = TCHelperClass.numGuestOptions[row]
+            numGuests.text = TCMasterData.guests[row]
             calculateResults()
             
         } else {
             
-            tipPercent.text =  TCHelperClass.tipPercentOptions[row]
+            tipPercent.text =  TCMasterData.tips[row]
             calculateResults()
         }
         

@@ -66,8 +66,10 @@ extension TCEqSplitViewController{
         doneToolbar.barStyle = UIBarStyle.Default
         
         let flexSpace = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil)
-        let done: UIBarButtonItem = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.Done, target: self, action: Selector("doneButtonAction"))
+       
+        let done: UIBarButtonItem = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.Done, target: self, action: #selector(doneButtonAction))
         
+       
         var items = [UIBarButtonItem]()
         items.append(flexSpace)
         items.append(done)
@@ -100,10 +102,10 @@ extension TCEqSplitViewController{
         
         if pickerView == numGuestpickerView{
             
-            return TCHelperClass.numGuestOptions.count
+            return TCMasterData.guests.count
         }
         else {
-            return TCHelperClass.tipPercentOptions.count
+            return TCMasterData.tips.count
         }
 
 
@@ -113,11 +115,11 @@ extension TCEqSplitViewController{
         
         if pickerView == numGuestpickerView{
             
-            return TCHelperClass.numGuestOptions[row]
+            return TCMasterData.guests[row]
         }
         else {
         
-            return TCHelperClass.tipPercentOptions[row]
+            return TCMasterData.tips[row]
         }
     }
     
@@ -125,12 +127,12 @@ extension TCEqSplitViewController{
        
         if pickerView == numGuestpickerView{
             
-            numGuests.text = TCHelperClass.numGuestOptions[row]
+            numGuests.text = TCMasterData.guests[row]
             calculateResults()
             
         } else {
             
-            tipPercent.text =  TCHelperClass.tipPercentOptions[row]
+            tipPercent.text =  TCMasterData.tips[row]
             calculateResults()
         }
         

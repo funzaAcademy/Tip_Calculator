@@ -16,6 +16,7 @@
 		C6ED8BB41D327166004C8BC7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C6ED8BB21D327166004C8BC7 /* LaunchScreen.storyboard */; };
 		C6ED8BBC1D327244004C8BC7 /* TCCellValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6ED8BBB1D327244004C8BC7 /* TCCellValues.swift */; };
 		C6ED8BBE1D3272D7004C8BC7 /* TCHelperClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6ED8BBD1D3272D7004C8BC7 /* TCHelperClass.swift */; };
+		C6EED3A71D3D1EF7005E49B4 /* TCMasterData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6EED3A61D3D1EF7005E49B4 /* TCMasterData.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		C6ED8BB51D327166004C8BC7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C6ED8BBB1D327244004C8BC7 /* TCCellValues.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TCCellValues.swift; sourceTree = "<group>"; };
 		C6ED8BBD1D3272D7004C8BC7 /* TCHelperClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TCHelperClass.swift; sourceTree = "<group>"; };
+		C6EED3A61D3D1EF7005E49B4 /* TCMasterData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TCMasterData.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +74,7 @@
 				C6ED8BBD1D3272D7004C8BC7 /* TCHelperClass.swift */,
 				C66C3EF81D34F2EB00D34854 /* TCTableViewCell.swift */,
 				C6106D141D37C64300868C04 /* TCInEqSplitViewController.swift */,
+				C6EED3A61D3D1EF7005E49B4 /* TCMasterData.swift */,
 			);
 			path = TipCalculator;
 			sourceTree = "<group>";
@@ -152,6 +155,7 @@
 				C6ED8BAA1D327166004C8BC7 /* AppDelegate.swift in Sources */,
 				C6ED8BBC1D327244004C8BC7 /* TCCellValues.swift in Sources */,
 				C6106D151D37C64300868C04 /* TCInEqSplitViewController.swift in Sources */,
+				C6EED3A71D3D1EF7005E49B4 /* TCMasterData.swift in Sources */,
 				C6ED8BBE1D3272D7004C8BC7 /* TCHelperClass.swift in Sources */,
 				C66C3EF91D34F2EB00D34854 /* TCTableViewCell.swift in Sources */,
 			);

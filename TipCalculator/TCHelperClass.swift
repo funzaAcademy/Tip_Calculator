@@ -11,8 +11,6 @@ import Foundation
 
 class TCHelperClass {
     
-    static let numGuestOptions = ["1","2","3","4","5"]
-    static let tipPercentOptions = ["5","10","15","20"]
     
     static var billAmount:Double? {
         didSet {
