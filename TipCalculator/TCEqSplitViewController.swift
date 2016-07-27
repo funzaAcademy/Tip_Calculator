@@ -23,9 +23,19 @@ class TCEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPicke
     var numGuestpickerView:UIPickerView!
     var tipPercentpickerView:UIPickerView!
     
+    @IBAction func doCalculate(sender: AnyObject) {
+        
+        calculateResults()
+    }
+    
+    
     override func viewDidLoad() {
 
         super.viewDidLoad()
+        
+        //Set Master Data
+        TCMasterData.setGuestValues()
+        TCMasterData.setTipValues()
         
         //Picker View
         numGuestpickerView = UIPickerView()
@@ -37,27 +47,42 @@ class TCEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPicke
         numGuests.inputView = numGuestpickerView
         tipPercent.inputView = tipPercentpickerView
         
+        // Return button on keyboard
         self.addDoneButtonOnKeyboard()
         
     }
     
     func calculateResults() {
         
-        if let numGuests = Int(numGuests.text!), tipPercent = Double(tipPercent.text!), billAmount = Double(billAmount.text!){
-            totalTipToPay.text = String(round( billAmount * tipPercent / 100 * 100 ) / 100)
-            totalToPay.text =  String (round ((billAmount + Double(totalTipToPay.text!)!) * 100 ) / 100 )
-            totalPerPerson.text = String ( round ( Double(totalToPay.text!)!/Double(numGuests) * 100.0  ) / 100 )
-            tipPerPerson.text = String ( round ( Double(totalTipToPay.text!)!/Double(numGuests) * 100.0  ) / 100 )
-     
+        if let numGuests = TCMasterData.guest_to_num_converter[numGuests.text!],
+            tipPercent = TCMasterData.tip_to_num_converter[tipPercent.text!],
+            billAmount = Double(billAmount.text!){
+            
+            TCHelperClass.billAmount = billAmount
+            TCHelperClass.numGuests = numGuests
+            TCHelperClass.tipPercent = tipPercent
+            
+            totalTipToPay.text = String(format: "%.2f", TCHelperClass.getTotalTip())
+            
+            totalToPay.text =  String(format: "%.2f", billAmount + TCHelperClass.getTotalTip())
+            
+            totalPerPerson.text = String(format: "%.2f", TCHelperClass.getPerPersonAmount() + TCHelperClass.getPerPersonTip())
+            
+            tipPerPerson.text = String(format: "%.2f", TCHelperClass.getPerPersonTip() )
+            
+        } else {
+            
+            numGuests.text = ""
+            tipPercent.text = ""
+            billAmount.text = ""
         }
         
     }
-    
-    
+
 
 }
 
-// Logic for adding the Return button on the Decimal Keyboard
+// MARK: Logic for adding the Return button on the Decimal Keyboard
 extension TCEqSplitViewController{
     
     func addDoneButtonOnKeyboard()
@@ -84,17 +109,18 @@ extension TCEqSplitViewController{
     func doneButtonAction()
     {
         self.billAmount.resignFirstResponder()
-        calculateResults()
     }
     
     
 }
 
-
-// Picker View Logic
+// MARK: Picker View logic
 extension TCEqSplitViewController{
     
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+        
+        //For example, if you wanted to do a picker for selecting time,
+        //you might have 3 components; one for each of hour, minutes and seconds
         return 1
     }
     
@@ -107,8 +133,8 @@ extension TCEqSplitViewController{
         else {
             return TCMasterData.tips.count
         }
-
-
+        
+        
     }
     
     func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
@@ -118,26 +144,23 @@ extension TCEqSplitViewController{
             return TCMasterData.guests[row]
         }
         else {
-        
+            
             return TCMasterData.tips[row]
         }
     }
     
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-       
+        
         if pickerView == numGuestpickerView{
             
             numGuests.text = TCMasterData.guests[row]
-            calculateResults()
             
         } else {
             
             tipPercent.text =  TCMasterData.tips[row]
-            calculateResults()
         }
         
         
     }
-
+    
 }
-

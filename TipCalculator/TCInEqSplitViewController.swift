@@ -4,7 +4,7 @@
 //
 //  Created by Sanjay noronha on 7/10/16.
 //  Copyright © 2016 funza Academy. All rights reserved.
-//
+
 
 import UIKit
 
@@ -20,20 +20,7 @@ class TCInEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPic
    
     @IBOutlet weak var tableView: UITableView!
     
-   /* var tcCellValues:[TCCellValues]? {
-        didSet{
-            
-            print ("roger wilco")
-            if let _ = tcCellValues {
-                
-            tableView.reloadData()
-            
-            }
-            
-        }
 
-    }
-  */
     
     var numGuestpickerView:UIPickerView!
     var tipPercentpickerView:UIPickerView!
@@ -61,24 +48,25 @@ class TCInEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPic
         self.addDoneButtonOnKeyboard()
         
     }
-    //         Int(numGuests.text!),
+    
+    @IBAction func doCalculate(sender: AnyObject) {
+        
+        calculateResults()
+    
+    }
     
     func calculateResults() {
         
         if let numGuests = TCMasterData.guest_to_num_converter[numGuests.text!],
             tipPercent = TCMasterData.tip_to_num_converter[tipPercent.text!],  
             billAmount = Double(billAmount.text!){
-            
-            print("Number of guests is : \(numGuests)")
-            
-            totalTipToPay.text = String(round( billAmount * tipPercent / 100 * 100 ) / 100)
-            totalToPay.text =  String (round ((billAmount + Double(totalTipToPay.text!)!) * 100 ) / 100 )
-            
+        
             TCHelperClass.billAmount = billAmount
             TCHelperClass.numGuests = numGuests
             TCHelperClass.tipPercent = tipPercent
             
-            //tcCellValues = TCHelperClass.tcCellValues
+            totalTipToPay.text = String(format: "%.2f", TCHelperClass.getTotalTip())
+            totalToPay.text =  String(format: "%.2f", billAmount + TCHelperClass.getTotalTip())
             
             tableView.reloadData()
             
@@ -95,8 +83,24 @@ extension TCInEqSplitViewController{
     
     func calcAndReload() -> Void {
 
-        TCHelperClass.seCellValues()
+        TCHelperClass.resetCellValues()
         tableView.reloadData()
+    }
+    
+    func keyboardWillShow(notification: NSNotification) {
+        print ("inside keyboard will show")
+        view.frame.origin.y -= getKeyboardHeight(notification)
+    }
+    
+    func keyboardWillHide(notification: NSNotification) {
+        print ("inside keyboard will hide")
+         view.frame.origin.y += getKeyboardHeight(notification)
+    }
+    
+    func getKeyboardHeight(notification: NSNotification) -> CGFloat {
+        let userInfo = notification.userInfo
+        let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue // of CGRect
+        return keyboardSize.CGRectValue().height
     }
     
 }
@@ -126,7 +130,6 @@ extension TCInEqSplitViewController{
     func doneButtonAction()
     {
         self.billAmount.resignFirstResponder()
-        calculateResults()
     }
     
     
@@ -150,6 +153,7 @@ extension TCInEqSplitViewController{
         let cell = tableView.dequeueReusableCellWithIdentifier("myTCCell") as! TCTableViewCell
         
         cell.myCellDetails = TCHelperClass.tcCellValues![indexPath.row]
+        cell.personLabel.text = "Guest \(indexPath.row + 1)"
         
         cell.delegate = self
         
@@ -199,12 +203,10 @@ extension TCInEqSplitViewController{
         if pickerView == numGuestpickerView{
             
             numGuests.text = TCMasterData.guests[row]
-            calculateResults()
             
         } else {
             
             tipPercent.text =  TCMasterData.tips[row]
-            calculateResults()
         }
         
         

@@ -28,28 +28,53 @@ class TCHelperClass {
             setInitialCellValues()
         }
     }
+    
 
     static var tcCellValues:[TCCellValues]?
     
+    static func getTotalTip() -> Double{
+        
+        if let billAmount = billAmount, tipPercent = tipPercent {
+            return round( billAmount * tipPercent / 100 * 1000 ) / 1000
+        }
+        
+        return 0.0
+    }
+    
+    
+    static func getPerPersonTip() -> Double{
+       
+        if let numGuests = numGuests {
+            return round( TCHelperClass.getTotalTip() / Double(numGuests) * 1000 ) / 1000
+        }
+        
+        return 0.0
+    }
+    
+    static func getPerPersonAmount() -> Double{
+      
+        if let numGuests = numGuests, billAmount = billAmount {
+            return round( billAmount / Double(numGuests) * 1000 ) / 1000
+        }
+        
+        return 0.0
+    }
+    
     static func setInitialCellValues() -> Void {
         
-        if let billAmount = billAmount,numGuests = numGuests,tipPercent = tipPercent{
-            
-            let perPersonAmount = round(100 * (billAmount / Double(numGuests)) ) / 100
-            let perPersonTipAmount =  round(tipPercent * perPersonAmount / 100  * 100)/100
-            let totalPerPersonAmount = round( (perPersonAmount + perPersonTipAmount) * 100 ) / 100
+        if let _ = billAmount,numGuests = numGuests,_ = tipPercent{
             
             tcCellValues = [TCCellValues]()
             
             for _ in 0..<numGuests {
-                tcCellValues?.append(TCCellValues(perPersonTotal: totalPerPersonAmount, perPersonTip: perPersonTipAmount))
+                tcCellValues?.append(TCCellValues(perPersonTotal: TCHelperClass.getPerPersonAmount(), perPersonTip: TCHelperClass.getPerPersonTip()))
             }
         }
     
     
     }
     
-    static func seCellValues() -> Void {
+    static func resetCellValues() -> Void {
   
         var tips:Double = 0.0
         var total:Double = 0.0
@@ -59,7 +84,7 @@ class TCHelperClass {
         //get modified tips and amounts
         for tcCellValue in tcCellValues!  {
                 
-                if tcCellValue.isCellModified {
+                if tcCellValue.isCellLocked {
                     
                     tips += tcCellValue.perPersonTip
                     total += tcCellValue.perPersonTotal
@@ -69,17 +94,14 @@ class TCHelperClass {
      
         }
         if ( numGuests! - counter ) > 0 {
-            //calculate the tips and amounts for the non modified
-            let totalTip = round( tipPercent! / 100 * billAmount! * 100) / 100
-            let totalAmount =  round ((totalTip + billAmount!) * 100 ) / 100
             
-            let perPersonTip =    round ( ( totalTip - tips ) / Double( numGuests! - counter ) * 100 ) / 100
-            let perPersonAmount =    round ( ( totalAmount - total ) / Double( numGuests! - counter ) * 100 ) / 100
-        
+            let perPersonTip =    round ( ( TCHelperClass.getTotalTip() - tips ) / Double( numGuests! - counter ) * 1000 ) / 1000
+           
+            let perPersonAmount =    round ( ( billAmount! - total ) / Double( numGuests! - counter ) * 1000 ) / 1000
         
             for tcCellValue in tcCellValues!  {
                 
-                if !tcCellValue.isCellModified {
+                if ( !tcCellValue.isCellLocked)  {
                     
                     tcCellValue.perPersonTip = perPersonTip
                     tcCellValue.perPersonTotal = perPersonAmount
@@ -88,19 +110,20 @@ class TCHelperClass {
                 
             }
             
-            for tcCellValue in tcCellValues!  {
-                
-                if tcCellValue.isCellModified {
-                    
-                    tcCellValue.isCellModified = false
-                    
-                }
-                
-            }
+
 
         }
 
         
     }
     
+    static func recalcTipAndAmountValues(totalAmount:Double) -> (Double,Double) {
+        
+        let amount =  round ( ( totalAmount / (1 + tipPercent!/100) ) * 1000 ) / 1000
+        let tipAmount = round ( amount * tipPercent! * 10) / 1000
+        
+        return (tipAmount,amount)
+    }
+    
+
 }

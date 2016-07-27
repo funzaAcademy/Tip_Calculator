@@ -13,39 +13,52 @@ import UIKit
 protocol TCTableViewCellProtocol:class  {
     
     func calcAndReload() -> Void
+    func keyboardWillShow(notification: NSNotification) -> Void
+    func keyboardWillHide(notification: NSNotification) -> Void
 }
 
 
-class TCTableViewCell:UITableViewCell {
+class TCTableViewCell:UITableViewCell,UITextFieldDelegate {
+
     
-    //Pseudo code
-    // user changes a tip value
-    // the changed column  is noted
-    // all the column values are recalculated
-    // the column changed values are reset
-    // the cells are reloaded
-    
-    @IBOutlet weak var totalAmount: UILabel!
-    @IBOutlet weak var tipAmount: UITextField!
-    @IBOutlet weak var canChangeValue: UISwitch!
-    
+    @IBOutlet weak var personLabel: UILabel!
+    @IBOutlet weak var amount: UILabel!
+    @IBOutlet weak var tipAmount: UILabel!
+    @IBOutlet weak var totalAmount: UITextField!
+    @IBOutlet weak var rowIsLocked: UISwitch!
     weak var delegate:TCTableViewCellProtocol?
 
-    var oldTipAmount:Double?
+    //var oldTipAmount:Double?
     
     var myCellDetails:TCCellValues? {
         
         didSet{
             
+            
             if let myCellDetails = myCellDetails{
                
-                self.totalAmount.text = String(myCellDetails.perPersonTotal)
-                self.tipAmount.text = String(myCellDetails.perPersonTip)
+                self.amount.text = String(format: "%.2f", myCellDetails.perPersonTotal)
+                self.tipAmount.text = String(format: "%.2f", myCellDetails.perPersonTip)
+                self.totalAmount.text = String(format: "%.2f", myCellDetails.perPersonTip + myCellDetails.perPersonTotal)
+               
+                if myCellDetails.isCellLocked {
+                    
+                    rowIsLocked.setOn(true, animated: false)
+                    
+                } else {
+                   
+                    rowIsLocked.setOn(false, animated: false)
+                    
+                }
                 
                 if oldValue == nil {
                     
-                    oldTipAmount = Double(tipAmount.text!)
-                    tipAmount.addTarget(self, action: #selector(textFieldDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
+                    //oldTipAmount = Double(tipAmount.text!)
+                    totalAmount.addTarget(self, action: #selector(totalAmountDidChange(_:)), forControlEvents: UIControlEvents.EditingDidEnd)
+                   
+                    self.addDoneButtonOnKeyboard()
+                    totalAmount.delegate = self
+                    
       
             }
         }
@@ -53,41 +66,108 @@ class TCTableViewCell:UITableViewCell {
     }
    
 }
+    func textFieldDidBeginEditing(textField: UITextField) {
+        
+        print("did begin editing")
+        subscribeToKeyboardNotifications()
+    }
     
-    func textFieldDidChange(textField: UITextField) {
+    @IBAction func sliderDidChange(sender: AnyObject) {
         
-        if let value = Double(textField.text!) {
+        
+        if rowIsLocked.on {
             
-            myCellDetails!.perPersonTip = value
-            
+            myCellDetails?.isCellLocked = true
         }
         else {
-            myCellDetails?.perPersonTip = 0.0
+            myCellDetails?.isCellLocked = false
         }
+    }
+    
+    
+    
+    
+    func totalAmountDidChange(textField: UITextField) {
         
-        myCellDetails!.isCellModified = true
         
-        if canChangeValue.on == true {
-            
-            myCellDetails!.isCellLocked = false
-            
-        }
-        else {
-            
-            myCellDetails!.isCellLocked = true
-            
-        }
+        (myCellDetails!.perPersonTip,myCellDetails!.perPersonTotal) = TCHelperClass.recalcTipAndAmountValues(Double(textField.text!)!)
         
-        myCellDetails!.perPersonTotal = myCellDetails!.perPersonTotal - oldTipAmount! + myCellDetails!.perPersonTip
+        print(myCellDetails!.perPersonTip )
+        print(myCellDetails!.perPersonTotal)
         
-        oldTipAmount = myCellDetails!.perPersonTip
-        
-        if let delegate = delegate {
+        rowIsLocked.setOn(true, animated: true)
+        myCellDetails?.isCellLocked = true
+
+       if let delegate = delegate {
             
             delegate.calcAndReload()
         }
+    
         
     }
+    
 
 }
+
+extension TCTableViewCell{
+    
+    func subscribeToKeyboardNotifications() {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(keyboardWillShow(_:))    , name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(keyboardWillHide(_:))    , name: UIKeyboardWillHideNotification, object: nil)
+    }
+    
+    func keyboardWillShow(notification: NSNotification) {
+        print("\(personLabel.text) : keyboardWillShow ")
+        
+        NSNotificationCenter.defaultCenter().removeObserver(self, name:
+            UIKeyboardWillShowNotification, object: nil)
+        delegate?.keyboardWillShow(notification)
+        
+       
+    }
+    
+    func keyboardWillHide(notification: NSNotification) {
+        print("\(personLabel.text) : keyboardWillHide ")
+        delegate?.keyboardWillHide(notification)
+    }
+    
+    func unsubscribeFromKeyboardNotifications() {
+        NSNotificationCenter.defaultCenter().removeObserver(self, name:
+            UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().removeObserver(self, name:
+            UIKeyboardWillHideNotification, object: nil)
+    }
+    
+}
+
+extension TCTableViewCell {
+    
+    func addDoneButtonOnKeyboard()
+    {
+        let doneToolbar: UIToolbar = UIToolbar(frame: CGRectMake(0, 0, 320, 50))
+        doneToolbar.barStyle = UIBarStyle.Default
+        
+        let flexSpace = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil)
+        let done: UIBarButtonItem = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.Done, target: self, action: #selector(doneButtonAction))
+        
+        var items = [UIBarButtonItem]()
+        items.append(flexSpace)
+        items.append(done)
+        
+        doneToolbar.items = items
+        doneToolbar.sizeToFit()
+        
+        self.totalAmount.inputAccessoryView = doneToolbar
+        
+    }
+    
+    func doneButtonAction()
+    {
+        self.totalAmount.resignFirstResponder()
+        unsubscribeFromKeyboardNotifications()
+    }
+
+    
+}
+
 

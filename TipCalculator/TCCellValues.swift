@@ -10,10 +10,10 @@ import UIKit
 
 class TCCellValues {
     
-    var perPersonTotal:Double
+    var perPersonTotal:Double //excludes the tip amount
     var perPersonTip:Double
-    var isCellLocked:Bool
-    var isCellModified:Bool
+    var isCellLocked:Bool     // this happens when a cell amount is changed 
+                              
     
     
     init(perPersonTotal:Double,perPersonTip:Double) {
@@ -22,7 +22,7 @@ class TCCellValues {
         self.perPersonTip   = perPersonTip
         
         isCellLocked = false
-        isCellModified = false
+        
     }
     
     
