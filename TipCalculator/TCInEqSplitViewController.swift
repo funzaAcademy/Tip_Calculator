@@ -36,9 +36,11 @@ class TCInEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPic
         //Picker View
         numGuestpickerView = UIPickerView()
         numGuestpickerView.delegate = self
+        numGuestpickerView.backgroundColor = TCMasterData.pickerBkgColor
         
         tipPercentpickerView = UIPickerView()
         tipPercentpickerView.delegate = self
+        tipPercentpickerView.backgroundColor = TCMasterData.pickerBkgColor
         
         numGuests.inputView = numGuestpickerView
         tipPercent.inputView = tipPercentpickerView
@@ -113,9 +115,14 @@ extension TCInEqSplitViewController{
         let doneToolbar: UIToolbar = UIToolbar(frame: CGRectMake(0, 0, 320, 50))
         doneToolbar.barStyle = UIBarStyle.Default
         
+        doneToolbar.barTintColor = TCMasterData.pickerBkgColor
+        
         let flexSpace = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil)
+        
         let done: UIBarButtonItem = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.Done, target: self, action: #selector(doneButtonAction))
         
+        done.tintColor = UIColor.whiteColor()
+     
         var items = [UIBarButtonItem]()
         items.append(flexSpace)
         items.append(done)
@@ -200,6 +207,8 @@ extension TCInEqSplitViewController{
     
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         
+        pickerView.reloadAllComponents()
+        
         if pickerView == numGuestpickerView{
             
             numGuests.text = TCMasterData.guests[row]
@@ -210,6 +219,17 @@ extension TCInEqSplitViewController{
         }
         
         
+    }
+    
+    func pickerView(pickerView: UIPickerView, attributedTitleForRow row: Int, forComponent component: Int) -> NSAttributedString? {
+        
+        let color = (row == pickerView.selectedRowInComponent(component)) ? UIColor.whiteColor() : UIColor.grayColor()
+        
+        if pickerView == numGuestpickerView{
+            return NSAttributedString(string: TCMasterData.guests[row], attributes: [NSForegroundColorAttributeName: color])
+        } else {
+            return NSAttributedString(string: TCMasterData.tips[row], attributes: [NSForegroundColorAttributeName: color])
+        }
     }
     
 }

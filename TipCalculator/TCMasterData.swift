@@ -6,10 +6,12 @@
 //  Copyright © 2016 funza Academy. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 
 struct TCMasterData {
+    
+    static let pickerBkgColor = UIColor(red: 135/255.0, green: 206/255.0, blue: 250/255.0, alpha: 0.8)
     
     static let single_guest = "Guest"
     static let many_guests  = "Guests"
