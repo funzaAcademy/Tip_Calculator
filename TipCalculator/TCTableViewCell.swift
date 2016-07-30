@@ -27,8 +27,8 @@ class TCTableViewCell:UITableViewCell,UITextFieldDelegate {
     @IBOutlet weak var totalAmount: UITextField!
     @IBOutlet weak var rowIsLocked: UISwitch!
     weak var delegate:TCTableViewCellProtocol?
-
-    //var oldTipAmount:Double?
+    
+    var oldAmountValue:Double!
     
     var myCellDetails:TCCellValues? {
         
@@ -40,6 +40,8 @@ class TCTableViewCell:UITableViewCell,UITextFieldDelegate {
                 self.amount.text = String(format: "%.2f", myCellDetails.perPersonTotal)
                 self.tipAmount.text = String(format: "%.2f", myCellDetails.perPersonTip)
                 self.totalAmount.text = String(format: "%.2f", myCellDetails.perPersonTip + myCellDetails.perPersonTotal)
+                
+                oldAmountValue = Double(self.totalAmount.text!)
                
                 if myCellDetails.isCellLocked {
                     
@@ -47,16 +49,21 @@ class TCTableViewCell:UITableViewCell,UITextFieldDelegate {
                     
                 } else {
                    
-                    rowIsLocked.setOn(false, animated: false)
+                    if rowIsLocked.on{
+                        
+                        rowIsLocked.setOn(false, animated: false)
+                    
+                    }
                     
                 }
                 
                 if oldValue == nil {
                     
-                    //oldTipAmount = Double(tipAmount.text!)
+                    //assumption that this will be triggered the first time only
                     totalAmount.addTarget(self, action: #selector(totalAmountDidChange(_:)), forControlEvents: UIControlEvents.EditingDidEnd)
                    
-                    self.addDoneButtonOnKeyboard()
+                    TCHelperClass.addDoneButtonOnKeyboard(self, sendingTextFld: totalAmount)
+                    
                     totalAmount.delegate = self
                     
       
@@ -68,7 +75,6 @@ class TCTableViewCell:UITableViewCell,UITextFieldDelegate {
 }
     func textFieldDidBeginEditing(textField: UITextField) {
         
-        print("did begin editing")
         subscribeToKeyboardNotifications()
     }
     
@@ -89,20 +95,26 @@ class TCTableViewCell:UITableViewCell,UITextFieldDelegate {
     
     func totalAmountDidChange(textField: UITextField) {
         
-        
-        (myCellDetails!.perPersonTip,myCellDetails!.perPersonTotal) = TCHelperClass.recalcTipAndAmountValues(Double(textField.text!)!)
-        
-        print(myCellDetails!.perPersonTip )
-        print(myCellDetails!.perPersonTotal)
-        
-        rowIsLocked.setOn(true, animated: true)
-        myCellDetails?.isCellLocked = true
-
-       if let delegate = delegate {
+        if let changedAmountValue = Double(textField.text!) {
             
-            delegate.calcAndReload()
+            // only if the new value is different from the old one
+            if ( oldAmountValue != changedAmountValue) {
+                
+                (myCellDetails!.perPersonTip,myCellDetails!.perPersonTotal) = TCHelperClass.recalcTipAndAmountValues(changedAmountValue)
+               
+                // trigger both the UI component and the cell value
+                // surely there is a better way to do this...
+                rowIsLocked.setOn(true, animated: true)
+                myCellDetails?.isCellLocked = true
+
+                if let delegate = delegate {
+                    
+                    delegate.calcAndReload()
+                }
+                
+                oldAmountValue = changedAmountValue
+            }
         }
-    
         
     }
     
@@ -117,17 +129,16 @@ extension TCTableViewCell{
     }
     
     func keyboardWillShow(notification: NSNotification) {
-        print("\(personLabel.text) : keyboardWillShow ")
         
         NSNotificationCenter.defaultCenter().removeObserver(self, name:
             UIKeyboardWillShowNotification, object: nil)
+        
         delegate?.keyboardWillShow(notification)
         
        
     }
     
     func keyboardWillHide(notification: NSNotification) {
-        print("\(personLabel.text) : keyboardWillHide ")
         delegate?.keyboardWillHide(notification)
     }
     
@@ -142,24 +153,6 @@ extension TCTableViewCell{
 
 extension TCTableViewCell {
     
-    func addDoneButtonOnKeyboard()
-    {
-        let doneToolbar: UIToolbar = UIToolbar(frame: CGRectMake(0, 0, 320, 50))
-        doneToolbar.barStyle = UIBarStyle.Default
-        
-        let flexSpace = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil)
-        let done: UIBarButtonItem = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.Done, target: self, action: #selector(doneButtonAction))
-        
-        var items = [UIBarButtonItem]()
-        items.append(flexSpace)
-        items.append(done)
-        
-        doneToolbar.items = items
-        doneToolbar.sizeToFit()
-        
-        self.totalAmount.inputAccessoryView = doneToolbar
-        
-    }
     
     func doneButtonAction()
     {

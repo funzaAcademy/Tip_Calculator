@@ -8,8 +8,10 @@
 
 import UIKit
 
-class TCInEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate, UITableViewDataSource,TCTableViewCellProtocol {
+class TCInEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate, UITableViewDataSource,TCTableViewCellProtocol,UITextFieldDelegate  {
     
+    
+    @IBOutlet weak var bottomView: UIView!
     
     @IBOutlet weak var numGuests: UITextField!
     @IBOutlet weak var tipPercent: UITextField!
@@ -20,14 +22,28 @@ class TCInEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPic
    
     @IBOutlet weak var tableView: UITableView!
     
-
-    
     var numGuestpickerView:UIPickerView!
     var tipPercentpickerView:UIPickerView!
     
+    override func viewDidAppear(animated: Bool) {
+        
+        super.viewDidAppear(animated)
+        
+        //Identify the active VC
+        TCHelperClass.isFirstVC = false
+    }
+    
     override func viewDidLoad() {
         
+        
         super.viewDidLoad()
+        
+        //initially hide Results
+        bottomView.alpha = 0
+        
+        //Text Field Delegates
+        numGuests.delegate = self
+        tipPercent.delegate = self
         
         //Set Master Data
         TCMasterData.setGuestValues()
@@ -47,7 +63,11 @@ class TCInEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPic
         
         tableView.dataSource = self
         
-        self.addDoneButtonOnKeyboard()
+        TCHelperClass.addDoneButtonOnKeyboard(self, sendingTextFld: billAmount)
+        
+        //Tap gesture recognizer
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tap)
         
     }
     
@@ -58,6 +78,9 @@ class TCInEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPic
     }
     
     func calculateResults() {
+        
+        //resign first responder
+        dismissKeyboard()
         
         if let numGuests = TCMasterData.guest_to_num_converter[numGuests.text!],
             tipPercent = TCMasterData.tip_to_num_converter[tipPercent.text!],  
@@ -72,7 +95,32 @@ class TCInEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPic
             
             tableView.reloadData()
             
+            //show the results
+            if self.bottomView.alpha == 0.0 {
+                
+                UIView.animateWithDuration(TCMasterData.animationDuration) {
+                    self.bottomView.alpha = 1.0
+                }
+            }
+            
+        }else {
+            
+            numGuests.text = ""
+            tipPercent.text = ""
+            billAmount.text = ""
+            
+            //hide the bottom view
+            if self.bottomView.alpha == 1.0 {
+                
+                UIView.animateWithDuration(TCMasterData.animationDuration) {
+                    self.bottomView.alpha = 0.0
+                }
+                
+            }
+            
         }
+        
+
         
     }
     
@@ -90,12 +138,12 @@ extension TCInEqSplitViewController{
     }
     
     func keyboardWillShow(notification: NSNotification) {
-        print ("inside keyboard will show")
+        
         view.frame.origin.y -= getKeyboardHeight(notification)
     }
     
     func keyboardWillHide(notification: NSNotification) {
-        print ("inside keyboard will hide")
+        
          view.frame.origin.y += getKeyboardHeight(notification)
     }
     
@@ -110,33 +158,15 @@ extension TCInEqSplitViewController{
 // MARK: Logic for adding the Return button on the Decimal Keyboard
 extension TCInEqSplitViewController{
     
-    func addDoneButtonOnKeyboard()
-    {
-        let doneToolbar: UIToolbar = UIToolbar(frame: CGRectMake(0, 0, 320, 50))
-        doneToolbar.barStyle = UIBarStyle.Default
-        
-        doneToolbar.barTintColor = TCMasterData.pickerBkgColor
-        
-        let flexSpace = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil)
-        
-        let done: UIBarButtonItem = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.Done, target: self, action: #selector(doneButtonAction))
-        
-        done.tintColor = UIColor.whiteColor()
-     
-        var items = [UIBarButtonItem]()
-        items.append(flexSpace)
-        items.append(done)
-        
-        doneToolbar.items = items
-        doneToolbar.sizeToFit()
-        
-        self.billAmount.inputAccessoryView = doneToolbar
-        
-    }
     
     func doneButtonAction()
     {
         self.billAmount.resignFirstResponder()
+    }
+    
+    func dismissKeyboard() {
+        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        view.endEditing(true)
     }
     
     
@@ -157,7 +187,7 @@ extension TCInEqSplitViewController{
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCellWithIdentifier("myTCCell") as! TCTableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier(TCMasterData.cellIdentifier) as! TCTableViewCell
         
         cell.myCellDetails = TCHelperClass.tcCellValues![indexPath.row]
         cell.personLabel.text = "Guest \(indexPath.row + 1)"
@@ -230,6 +260,29 @@ extension TCInEqSplitViewController{
         } else {
             return NSAttributedString(string: TCMasterData.tips[row], attributes: [NSForegroundColorAttributeName: color])
         }
+    }
+    
+}
+
+//MARK: UITextFieldDelegate implementation
+extension TCInEqSplitViewController {
+    
+    func textFieldDidBeginEditing(textField: UITextField) {
+        
+        if textField.text == "" {
+            
+            if textField == numGuests {
+                
+                numGuests.text = TCMasterData.guests[numGuestpickerView.selectedRowInComponent(0)]
+                
+            }
+            if textField == tipPercent {
+                
+                tipPercent .text = TCMasterData.tips[tipPercentpickerView.selectedRowInComponent(0)]
+            }
+        }
+        
+        
     }
     
 }

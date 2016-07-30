@@ -6,17 +6,19 @@
 //  Copyright © 2016 funza Academy. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 
 class TCHelperClass {
     
+    static var isFirstVC:Bool = true
     
     static var billAmount:Double? {
         didSet {
                 setInitialCellValues()
         }
     }
+    
     static var numGuests:Int? {
         didSet {
             setInitialCellValues()
@@ -35,7 +37,9 @@ class TCHelperClass {
     static func getTotalTip() -> Double{
         
         if let billAmount = billAmount, tipPercent = tipPercent {
+            
             return round( billAmount * tipPercent / 100 * 1000 ) / 1000
+            
         }
         
         return 0.0
@@ -51,6 +55,7 @@ class TCHelperClass {
         return 0.0
     }
     
+    
     static func getPerPersonAmount() -> Double{
       
         if let numGuests = numGuests, billAmount = billAmount {
@@ -60,14 +65,18 @@ class TCHelperClass {
         return 0.0
     }
     
+    
     static func setInitialCellValues() -> Void {
         
         if let _ = billAmount,numGuests = numGuests,_ = tipPercent{
             
-            tcCellValues = [TCCellValues]()
+            tcCellValues = [] // some redundancy will happen here
             
-            for _ in 0..<numGuests {
-                tcCellValues?.append(TCCellValues(perPersonTotal: TCHelperClass.getPerPersonAmount(), perPersonTip: TCHelperClass.getPerPersonTip()))
+            //initialize only if second VC is active
+            if isFirstVC == false{
+                for _ in 0..<numGuests {
+                    tcCellValues?.append(TCCellValues(perPersonTotal: TCHelperClass.getPerPersonAmount(), perPersonTip: TCHelperClass.getPerPersonTip()))
+                }
             }
         }
     
@@ -93,6 +102,8 @@ class TCHelperClass {
                 }
      
         }
+        // do this only if there are some guests
+        // whose total amount is not modified
         if ( numGuests! - counter ) > 0 {
             
             let perPersonTip =    round ( ( TCHelperClass.getTotalTip() - tips ) / Double( numGuests! - counter ) * 1000 ) / 1000
@@ -119,10 +130,50 @@ class TCHelperClass {
     
     static func recalcTipAndAmountValues(totalAmount:Double) -> (Double,Double) {
         
-        let amount =  round ( ( totalAmount / (1 + tipPercent!/100) ) * 1000 ) / 1000
-        let tipAmount = round ( amount * tipPercent! * 10) / 1000
+        if let tipPercent = tipPercent {
+            
+            let amount =  round ( ( totalAmount / (1 + tipPercent/100) ) * 1000 ) / 1000
+            let tipAmount = round ( amount * tipPercent * 10) / 1000
+            
+            
+            return (tipAmount,amount)
+        }
         
-        return (tipAmount,amount)
+        return (0.0,0.0)
+    }
+    
+    /*
+    * http://stackoverflow.com/questions/35689528/add-a-view-on-top-of-the-keyboard
+    * using-inputaccessoryview-swift
+    */
+    static func addDoneButtonOnKeyboard(sendingVC:AnyObject,sendingTextFld:UITextField)
+    {
+        let doneToolbar: UIToolbar = UIToolbar(frame: CGRectMake(0, 0, 320, 50))
+        doneToolbar.barStyle = UIBarStyle.Default
+        
+        doneToolbar.barTintColor = TCMasterData.pickerBkgColor
+        
+        let flexSpace = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil)
+        
+        let done: UIBarButtonItem = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.Done, target: sendingVC, action: #selector(doneButtonAction))
+        
+        done.tintColor = UIColor.whiteColor()
+
+        var items = [UIBarButtonItem]()
+        items.append(flexSpace)
+        items.append(done)
+        
+        doneToolbar.items = items
+        doneToolbar.sizeToFit()
+        
+        sendingTextFld.inputAccessoryView = doneToolbar
+        
+    }
+    
+    @objc static func doneButtonAction()
+    {
+        print("Dummy: Not used")
+        
     }
     
 
