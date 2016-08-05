@@ -73,10 +73,7 @@ class TCTableViewCell:UITableViewCell,UITextFieldDelegate {
     }
    
 }
-    func textFieldDidBeginEditing(textField: UITextField) {
-        
-        subscribeToKeyboardNotifications()
-    }
+
     
     @IBAction func sliderDidChange(sender: AnyObject) {
         
@@ -124,29 +121,32 @@ class TCTableViewCell:UITableViewCell,UITextFieldDelegate {
 extension TCTableViewCell{
     
     func subscribeToKeyboardNotifications() {
+        
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(keyboardWillShow(_:))    , name: UIKeyboardWillShowNotification, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(keyboardWillHide(_:))    , name: UIKeyboardWillHideNotification, object: nil)
     }
     
     func keyboardWillShow(notification: NSNotification) {
         
-        NSNotificationCenter.defaultCenter().removeObserver(self, name:
-            UIKeyboardWillShowNotification, object: nil)
-        
         delegate?.keyboardWillShow(notification)
+        unsubscribeFromKeyboardNotifications()
         
-       
     }
     
     func keyboardWillHide(notification: NSNotification) {
+        
         delegate?.keyboardWillHide(notification)
+        unsubscribeFromKeyboardNotifications()
+        
     }
     
     func unsubscribeFromKeyboardNotifications() {
+        
         NSNotificationCenter.defaultCenter().removeObserver(self, name:
             UIKeyboardWillShowNotification, object: nil)
         NSNotificationCenter.defaultCenter().removeObserver(self, name:
             UIKeyboardWillHideNotification, object: nil)
+        
     }
     
 }
@@ -156,11 +156,23 @@ extension TCTableViewCell {
     
     func doneButtonAction()
     {
+        
+        subscribeToKeyboardNotifications()
         self.totalAmount.resignFirstResponder()
-        unsubscribeFromKeyboardNotifications()
+
     }
 
     
 }
 
+ //MARK: UITextFieldDelegate functions
+extension TCTableViewCell {
+    
+    func textFieldDidBeginEditing(textField: UITextField) {
+        
+        subscribeToKeyboardNotifications()
+        
+    }
+
+}
 

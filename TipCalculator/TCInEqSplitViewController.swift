@@ -25,6 +25,8 @@ class TCInEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPic
     var numGuestpickerView:UIPickerView!
     var tipPercentpickerView:UIPickerView!
     
+    private var keyboardOn = false //comments in func: dismissKeyboard()
+    
     override func viewDidAppear(animated: Bool) {
         
         super.viewDidAppear(animated)
@@ -137,19 +139,35 @@ extension TCInEqSplitViewController{
         tableView.reloadData()
     }
     
+   
     func keyboardWillShow(notification: NSNotification) {
         
-        view.frame.origin.y -= getKeyboardHeight(notification)
+        if !keyboardOn  {
+            
+            view.frame.origin.y -= getKeyboardHeight(notification)
+            keyboardOn = true
+            
+        }
     }
+    
     
     func keyboardWillHide(notification: NSNotification) {
         
-         view.frame.origin.y += getKeyboardHeight(notification)
+        if keyboardOn {
+            
+            view.frame.origin.y += getKeyboardHeight(notification)
+            keyboardOn = false
+            
+        }
+
     }
     
+    
     func getKeyboardHeight(notification: NSNotification) -> CGFloat {
+        
         let userInfo = notification.userInfo
         let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue // of CGRect
+       
         return keyboardSize.CGRectValue().height
     }
     
@@ -164,9 +182,20 @@ extension TCInEqSplitViewController{
         self.billAmount.resignFirstResponder()
     }
     
+    
     func dismissKeyboard() {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
-        view.endEditing(true)
+        
+        /*
+         * If the Y coordinate is decreased and if this function is triggered
+         * then the 'notification' object has a 0 height value
+         * So the y coordinate is not increased
+         * Thus this  tap gesture function is only called when the keyboard y coordinate
+         * is not in the decreased state
+        */
+        if !keyboardOn {
+            view.endEditing(true)
+        }
     }
     
     
@@ -185,14 +214,17 @@ extension TCInEqSplitViewController{
         return 0
     }
     
+    
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCellWithIdentifier(TCMasterData.cellIdentifier) as! TCTableViewCell
         
-        cell.myCellDetails = TCHelperClass.tcCellValues![indexPath.row]
-        cell.personLabel.text = "Guest \(indexPath.row + 1)"
-        
-        cell.delegate = self
+       if let helperArray = TCHelperClass.tcCellValues {
+            cell.myCellDetails =    helperArray[indexPath.row]
+            cell.personLabel.text = "Guest \(indexPath.row + 1)"
+            
+            cell.delegate = self
+        }
         
         return cell
         
@@ -209,6 +241,7 @@ extension TCInEqSplitViewController{
         //you might have 3 components; one for each of hour, minutes and seconds
         return 1
     }
+    
     
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         
@@ -235,6 +268,7 @@ extension TCInEqSplitViewController{
         }
     }
     
+   
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         
         pickerView.reloadAllComponents()
@@ -251,6 +285,7 @@ extension TCInEqSplitViewController{
         
     }
     
+   
     func pickerView(pickerView: UIPickerView, attributedTitleForRow row: Int, forComponent component: Int) -> NSAttributedString? {
         
         let color = (row == pickerView.selectedRowInComponent(component)) ? UIColor.whiteColor() : UIColor.grayColor()

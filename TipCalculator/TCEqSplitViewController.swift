@@ -11,6 +11,8 @@ import UIKit
 class TCEqSplitViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate, UITextFieldDelegate {
 
    
+    @IBOutlet weak var calculateBtn: UIButton!
+    
     @IBOutlet weak var bottomView: UIView!
     
     @IBOutlet weak var numGuests: UITextField!
@@ -157,6 +159,7 @@ extension TCEqSplitViewController{
     }
     
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        
         
         if pickerView == numGuestpickerView{
             

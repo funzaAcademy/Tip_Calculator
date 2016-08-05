@@ -648,6 +648,7 @@
                     <connections>
                         <outlet property="billAmount" destination="UIj-az-Egt" id="z2q-Ti-qsY"/>
                         <outlet property="bottomView" destination="Dhu-Sh-anX" id="6VO-1s-SxQ"/>
+                        <outlet property="calculateBtn" destination="6XX-BT-hNK" id="Ydz-e1-JUj"/>
                         <outlet property="numGuests" destination="jSr-Oq-GDs" id="WUt-MU-IoB"/>
                         <outlet property="tipPerPerson" destination="gpj-GF-6kz" id="9LN-r7-ejl"/>
                         <outlet property="tipPercent" destination="Ge5-6u-Cph" id="Rh7-NZ-aSr"/>
