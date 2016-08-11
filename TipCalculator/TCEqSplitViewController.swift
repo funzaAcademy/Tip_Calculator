@@ -203,7 +203,7 @@ extension TCEqSplitViewController{
     
     func pickerView(pickerView: UIPickerView, attributedTitleForRow row: Int, forComponent component: Int) -> NSAttributedString? {
         
-        let color = (row == pickerView.selectedRowInComponent(component)) ? UIColor.whiteColor() : UIColor.grayColor()
+        let color = (row == pickerView.selectedRowInComponent(component)) ? TCMasterData.pickerTxtColor : UIColor.grayColor()
         
         if pickerView == numGuestpickerView{
             return NSAttributedString(string: TCMasterData.guests[row], attributes: [NSForegroundColorAttributeName: color])

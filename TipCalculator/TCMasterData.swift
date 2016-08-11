@@ -11,7 +11,8 @@ import UIKit
 
 struct TCMasterData {
     
-    static let pickerBkgColor = UIColor(red: 135/255.0, green: 206/255.0, blue: 250/255.0, alpha: 1.0)
+    static let pickerBkgColor = UIColor(red: 215/255.0, green: 218/255.0, blue: 219/255.0, alpha: 1.0)
+    static let pickerTxtColor = UIColor(red: 252/255.0, green: 67/255.0, blue: 73/255.0, alpha: 1.0)
     
     static let cellIdentifier = "myTCCell"
 

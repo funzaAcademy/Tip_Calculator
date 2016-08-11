@@ -15,19 +15,29 @@ class TCHelperClass {
     
     static var billAmount:Double? {
         didSet {
+           
+            if isFirstVC == false {
                 setInitialCellValues()
+            }
         }
     }
     
     static var numGuests:Int? {
         didSet {
-            setInitialCellValues()
+           
+            if isFirstVC == false {
+                setInitialCellValues()
+            }
+            
         }
     }
 
     static var tipPercent:Double? {
         didSet {
-            setInitialCellValues()
+            
+            if isFirstVC == false {
+                setInitialCellValues()
+            }
         }
     }
     
@@ -151,7 +161,7 @@ class TCHelperClass {
         let doneToolbar: UIToolbar = UIToolbar(frame: CGRectMake(0, 0, 320, 50))
         doneToolbar.barStyle = UIBarStyle.Default
         
-        doneToolbar.barTintColor = TCMasterData.pickerBkgColor
+        doneToolbar.barTintColor = TCMasterData.pickerTxtColor
         
         let flexSpace = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil)
         
